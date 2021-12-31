@@ -33,7 +33,7 @@ namespace WishList.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> Register(RegisterViewModel registerViewModel)
+        public IActionResult Register(RegisterViewModel registerViewModel)
         {
             if (!ModelState.IsValid)
             {
@@ -47,7 +47,7 @@ namespace WishList.Controllers
                 PasswordHash = registerViewModel.Password
             };
 
-            var result = await _userManager.CreateAsync(appUser);
+            var result = _userManager.CreateAsync(appUser).Result;
 
             if (!result.Succeeded)
             {
