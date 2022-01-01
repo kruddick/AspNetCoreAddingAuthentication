@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using WishList.Models;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using WishList.Models;
 using WishList.Models.AccountViewModels;
-using System.Threading.Tasks;
 
 namespace WishList.Controllers
 {
@@ -19,11 +18,6 @@ namespace WishList.Controllers
             _signInManager = signInManager;
         }
 
-        public IActionResult Index()
-        {
-            return View();
-        }
-
         [HttpGet]
         [AllowAnonymous]
         public IActionResult Register()
@@ -36,30 +30,21 @@ namespace WishList.Controllers
         public IActionResult Register(RegisterViewModel model)
         {
             if (!ModelState.IsValid)
-            {
                 return View(model);
-            }
 
-            var appUser = new ApplicationUser()
-            {
-                Email = model.Email,
-                UserName = model.Email,
-                PasswordHash = model.Password
-            };
-
-            var result = _userManager.CreateAsync(appUser).Result;
+            var result = _userManager.CreateAsync(new ApplicationUser() { Email = model.Email, UserName = model.Email }, model.Password).Result;
 
             if (!result.Succeeded)
             {
-                foreach(var error in result.Errors)
+                foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError("Password", error.Description);
                 }
+                return View(model);
             }
 
-            return View(model);
+            return RedirectToAction("Index", "Home");
         }
-
 
         [HttpGet]
         [AllowAnonymous]
@@ -77,7 +62,6 @@ namespace WishList.Controllers
                 return View(model);
 
             var result = _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false).Result;
-            
             if (!result.Succeeded)
             {
                 ModelState.AddModelError(string.Empty, "Invalid login attempt.");
@@ -94,6 +78,5 @@ namespace WishList.Controllers
             _signInManager.SignOutAsync();
             return RedirectToAction("Index", "Home");
         }
-
     }
 }
