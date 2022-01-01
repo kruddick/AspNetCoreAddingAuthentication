@@ -33,18 +33,18 @@ namespace WishList.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public IActionResult Register(RegisterViewModel registerViewModel)
+        public IActionResult Register(RegisterViewModel model)
         {
             if (!ModelState.IsValid)
             {
-                return View(registerViewModel);
+                return View(model);
             }
 
             var appUser = new ApplicationUser()
             {
-                Email = registerViewModel.Email,
-                UserName = registerViewModel.Email,
-                PasswordHash = registerViewModel.Password
+                Email = model.Email,
+                UserName = model.Email,
+                PasswordHash = model.Password
             };
 
             var result = _userManager.CreateAsync(appUser).Result;
@@ -57,7 +57,43 @@ namespace WishList.Controllers
                 }
             }
 
-            return View(registerViewModel);
+            return View(model);
         }
+
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public IActionResult Login(LoginViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var result = _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false).Result;
+            
+            if (!result.Succeeded)
+            {
+                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                return View(model);
+            }
+
+            return RedirectToAction("Index", "Item");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Logout()
+        {
+            _signInManager.SignOutAsync();
+            return RedirectToAction("Index", "Home");
+        }
+
     }
 }
